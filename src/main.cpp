@@ -1,14 +1,16 @@
 #include <Arduino.h>
 
+#define DIVIDER 1.99350649351
+#define OFFSET 0.0
+#define RESISTOR 0.10
+#define GAIN_ERROR_CORRECTION 1.01
+
 void setup() {
   // put your setup code here, to run once:
   SerialUSB.begin(115200);
-  while (!SerialUSB)
-    ;
+  while (!SerialUSB);;
   SerialUSB.println("Hello World!");
-  pinMode(LED_BUILTIN, OUTPUT);
   pinMode(A0, INPUT_ANALOG);
-  digitalWrite(LED_BUILTIN, HIGH);
   analogReadResolution(12);
 }
 double adcToVoltageMv(uint16_t adc) {
@@ -28,13 +30,13 @@ double adcToVoltageMv(uint16_t adc) {
 double voltageToCurrentMa(double voltage) {
   SerialUSB.print("voltage: ");
   SerialUSB.println(voltage);
-  return voltage * 1.99350649351 * 2;
+  return voltage * DIVIDER * RESISTOR * 20;
 }
 
 double avgAdc(uint8_t pin, uint8_t samples) {
   double avg = 0.0;
   for (uint8_t i = 0; i < samples; i++) {
-    avg += adcToVoltageMv(analogRead(pin)) / 1.01;
+    avg += adcToVoltageMv(analogRead(pin)) / GAIN_ERROR_CORRECTION;
     delay(5);
   }
   avg = avg / samples;
